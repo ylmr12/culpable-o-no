@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>CULPABLE O NO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14303a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Culpable o no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pet:#244653;--petd:#1a3540;--cream:#FFF0D5;--wood:#754C35;--woodd:#53331f;
+  --gold:#E8B65A;--sage:#8BA58B;--rose:#E9A8A8;--ink:#14303a;--brown:#4a2c1c;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  padding-left:env(safe-area-inset-left,0px);
+  padding-right:env(safe-area-inset-right,0px);
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;background:var(--ink);display:grid;place-items:center;overflow:hidden;
+  font-family:'Pixelify Sans','Press Start 2P',ui-monospace,monospace;color:var(--brown);
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none;
+}
+*{box-sizing:border-box}
+img,canvas{image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:pixelated}
+#stage{
+  position:relative;width:min(100vw,177.78vh);width:min(calc(100vw - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)),calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*16/9));
+  aspect-ratio:16/9;container-type:size;overflow:hidden;background:var(--pet);
+}
+.screen{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .25s}
+.screen.active{opacity:1;visibility:visible}
+.bg{position:absolute;inset:0;width:100%;height:100%}
+.shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(36,70,83,.35),rgba(20,48,58,.85))}
+.shade.soft{background:linear-gradient(rgba(20,48,58,.45),rgba(20,48,58,.7))}
+
+/* ---------- botones ---------- */
+.btn{
+  font:inherit;font-weight:700;font-size:2.3cqw;letter-spacing:.08cqw;color:var(--brown);
+  border:0;margin:0;padding:1.2cqw 3.6cqw;cursor:pointer;position:relative;overflow:hidden;
+  background:
+    linear-gradient(var(--cream),var(--cream)) .55cqw .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) right .55cqw top .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) left .55cqw bottom .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) right .55cqw bottom .55cqw/.5cqw .5cqw no-repeat,
+    var(--gold);
+  box-shadow:
+    0 -.35cqw 0 0 var(--wood),0 .35cqw 0 0 var(--wood),-.35cqw 0 0 0 var(--wood),.35cqw 0 0 0 var(--wood),
+    0 1cqw 0 0 var(--woodd),
+    inset 0 .45cqw 0 0 #f7d995,inset 0 -.5cqw 0 0 #c48d36;
+  transition:transform .08s steps(2),filter .15s;
+}
+.btn::after{
+  content:"";position:absolute;top:0;bottom:0;left:-60%;width:30%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-20deg);animation:shine 3.4s infinite;pointer-events:none;
+}
+@keyframes shine{0%,70%{left:-60%}100%{left:130%}}
+.btn:hover,.btn:focus-visible{filter:brightness(1.08);transform:translateY(-.25cqw);outline:none}
+.btn:focus-visible{outline:.35cqw dashed var(--cream);outline-offset:.9cqw}
+.btn:active{transform:translateY(.5cqw);box-shadow:
+  0 -.35cqw 0 0 var(--wood),0 .35cqw 0 0 var(--wood),-.35cqw 0 0 0 var(--wood),.35cqw 0 0 0 var(--wood),
+  0 .4cqw 0 0 var(--woodd),inset 0 .45cqw 0 0 #c48d36}
+.btn.big{font-size:3.4cqw;padding:1.6cqw 7cqw}
+.btn.sm{font-size:1.6cqw;padding:.7cqw 2cqw}
+.btn.rose{--g:var(--rose)}
+.btn.rose{background:
+    linear-gradient(var(--cream),var(--cream)) .55cqw .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) right .55cqw top .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) left .55cqw bottom .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) right .55cqw bottom .55cqw/.5cqw .5cqw no-repeat,
+    var(--rose)}
+.btn.sage{background:
+    linear-gradient(var(--cream),var(--cream)) .55cqw .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) right .55cqw top .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) left .55cqw bottom .55cqw/.5cqw .5cqw no-repeat,
+    linear-gradient(var(--cream),var(--cream)) right .55cqw bottom .55cqw/.5cqw .5cqw no-repeat,
+    var(--sage)}
+.btn.off{filter:grayscale(.8) brightness(.8);cursor:not-allowed}
+.btn.off::after{display:none}
+
+.panel{
+  background:var(--cream);color:var(--brown);
+  box-shadow:
+    0 -.45cqw 0 0 var(--wood),0 .45cqw 0 0 var(--wood),-.45cqw 0 0 0 var(--wood),.45cqw 0 0 0 var(--wood),
+    0 1.3cqw 0 0 rgba(10,25,32,.45),
+    inset 0 0 0 .3cqw var(--gold),inset 0 0 0 .7cqw #f9e7c1;
+}
+.rb{ /* cinta */
+  display:inline-block;background:var(--rose);color:var(--brown);font-weight:700;padding:.5cqw 2.4cqw;
+  box-shadow:0 -.3cqw 0 var(--wood),0 .3cqw 0 var(--wood),-.3cqw 0 0 var(--wood),.3cqw 0 0 var(--wood),inset 0 -.4cqw 0 #d28d8d;
+}
+
+/* ---------- inicio ---------- */
+.titleBox{position:absolute;left:0;right:0;top:4.5cqw;text-align:center}
+.titleBox canvas{width:9cqw;height:6.8cqw;animation:bob 1.6s steps(2) infinite}
+.sub{font-size:1.9cqw;margin:1.2cqw 0 0}
+h1.t{
+  margin:1cqw 0 0;font-size:9.4cqw;line-height:1;font-weight:700;color:var(--gold);letter-spacing:.2cqw;
+  text-shadow:
+    -.4cqw 0 0 var(--ink),.4cqw 0 0 var(--ink),0 -.4cqw 0 var(--ink),0 .4cqw 0 var(--ink),
+    -.4cqw -.4cqw 0 var(--ink),.4cqw -.4cqw 0 var(--ink),-.4cqw .4cqw 0 var(--ink),.4cqw .4cqw 0 var(--ink),
+    0 1cqw 0 var(--wood),.4cqw 1cqw 0 var(--wood),-.4cqw 1cqw 0 var(--wood),0 1.4cqw 0 var(--ink);
+  animation:float 3s ease-in-out infinite;
+}
+h1.t span{color:var(--cream)}
+.playWrap{position:absolute;left:0;right:0;top:32cqw;text-align:center}
+.parade{position:absolute;left:0;right:0;bottom:2.4cqw;display:flex;justify-content:center;gap:6cqw}
+.parade img{width:8.5cqw;animation:bob 1.2s steps(2) infinite}
+.parade img:nth-child(2){animation-delay:.3s}.parade img:nth-child(3){animation-delay:.6s}.parade img:nth-child(4){animation-delay:.9s}
+@keyframes float{50%{transform:translateY(-.8cqw)}}
+@keyframes bob{50%{transform:translateY(-.5cqw)}}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.4cqw)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-.8cqw)}75%{transform:translateX(.8cqw)}}
+.shake{animation:shake .3s steps(4)}
+
+/* ---------- registro / bienvenida ---------- */
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center}
+.reg{width:58cqw;padding:3.6cqw 4cqw 3.4cqw}
+.reg h2,.wel h2{margin:0 0 1cqw;font-size:3.6cqw;color:var(--wood)}
+.reg p{margin:0 0 2cqw;font-size:1.8cqw}
+#name-in{
+  width:100%;font:inherit;font-weight:600;font-size:3cqw;text-align:center;color:var(--brown);
+  background:#fff9ea;border:0;padding:1.1cqw 1cqw;outline:none;
+  box-shadow:0 -.3cqw 0 var(--sage),0 .3cqw 0 var(--sage),-.3cqw 0 0 var(--sage),.3cqw 0 0 var(--sage),inset 0 .4cqw 0 #efdcb4;
+}
+#name-in:focus{box-shadow:0 -.3cqw 0 var(--gold),0 .3cqw 0 var(--gold),-.3cqw 0 0 var(--gold),.3cqw 0 0 var(--gold),inset 0 .4cqw 0 #efdcb4}
+#name-err{min-height:2.6cqw;margin:1.2cqw 0 1.4cqw;font-size:1.7cqw;color:#a8423c;font-weight:600}
+.row{display:flex;justify-content:center;gap:2.6cqw}
+.wel{width:70cqw;padding:3.6cqw 4cqw 3.6cqw}
+.wel h2{font-size:4.6cqw;margin-bottom:1.4cqw;animation:float 2.6s ease-in-out infinite}
+.wel p{font-size:2cqw;margin:0 0 2.6cqw;line-height:1.35}
+.wel .pr{display:flex;justify-content:center;gap:3cqw;margin-bottom:2cqw}
+.wel .pr img{width:6.5cqw;animation:bob 1.1s steps(2) infinite}
+.wel .pr img:nth-child(2){animation-delay:.25s}.wel .pr img:nth-child(3){animation-delay:.5s}.wel .pr img:nth-child(4){animation-delay:.75s}
+
+/* ---------- menú ---------- */
+.top{position:absolute;left:2.4cqw;right:8cqw;top:1.8cqw;display:flex;align-items:center;gap:1.6cqw}
+.top .av{width:5cqw;background:var(--cream);padding:.3cqw;box-shadow:0 0 0 .3cqw var(--wood)}
+.top .nm{font-size:2.2cqw;font-weight:700;color:var(--cream);text-shadow:.25cqw .25cqw 0 var(--ink)}
+.top .pg{font-size:1.5cqw;color:var(--gold);text-shadow:.2cqw .2cqw 0 var(--ink)}
+.top .sp{flex:1}
+.tabs{position:absolute;left:0;right:0;top:9.4cqw;display:flex;justify-content:center;gap:2cqw}
+.tab{opacity:.65;transform:scale(.92)}
+.tab.on{opacity:1;transform:none}
+.lvlTitle{position:absolute;left:0;right:0;top:15.6cqw;text-align:center;font-size:1.9cqw;color:var(--cream);text-shadow:.25cqw .25cqw 0 var(--ink)}
+#cards{position:absolute;left:0;right:0;top:19.8cqw;display:flex;justify-content:center;gap:3cqw}
+.card{
+  width:26.5cqw;font:inherit;color:var(--brown);text-align:left;padding:1.1cqw 1.1cqw 1.4cqw;border:0;cursor:pointer;position:relative;
+  background:var(--cream);
+  box-shadow:0 -.4cqw 0 var(--wood),0 .4cqw 0 var(--wood),-.4cqw 0 0 var(--wood),.4cqw 0 0 var(--wood),0 1.2cqw 0 rgba(10,25,32,.45),inset 0 0 0 .3cqw var(--gold);
+  transition:transform .12s steps(3);
+}
+.card:hover,.card:focus-visible{transform:translateY(-.8cqw);outline:none}
+.card:focus-visible{box-shadow:0 -.4cqw 0 var(--gold),0 .4cqw 0 var(--gold),-.4cqw 0 0 var(--gold),.4cqw 0 0 var(--gold),0 1.2cqw 0 rgba(10,25,32,.45)}
+.card canvas{display:block;width:100%;aspect-ratio:16/9;box-shadow:0 0 0 .3cqw var(--wood)}
+.card .no{position:absolute;left:.4cqw;top:.4cqw;background:var(--rose);font-size:1.3cqw;font-weight:700;padding:.2cqw 1cqw;box-shadow:0 0 0 .25cqw var(--wood);z-index:2}
+.card h3{margin:1.2cqw 0 .2cqw;font-size:2cqw;line-height:1.1}
+.card .tp{font-size:1.35cqw;color:var(--wood);margin-bottom:.6cqw}
+.card .st{font-size:1.5cqw;font-weight:700;color:#3d7a52}
+.card .st.go{color:#b4741a;animation:blink 1s steps(2) infinite}
+.card.locked canvas{filter:grayscale(1) brightness(.55)}
+.card.locked{background:#d9cbb0}
+.card.locked .st{color:#7d6a58;font-size:1.3cqw}
+.card .lk{position:absolute;left:0;right:0;top:3.6cqw;text-align:center;font-size:5.4cqw;z-index:2;text-shadow:.3cqw .3cqw 0 var(--ink)}
+@keyframes blink{50%{opacity:.45}}
+.foot{position:absolute;left:2.4cqw;right:2.4cqw;bottom:1.4cqw;display:flex;align-items:center;gap:2cqw;font-size:1.25cqw;color:var(--cream);text-shadow:.2cqw .2cqw 0 var(--ink)}
+.foot p{margin:0;flex:1;opacity:.85}
+
+/* ---------- personajes ---------- */
+.chT{position:absolute;left:0;right:0;top:3cqw;text-align:center}
+.chT h2{margin:0;font-size:4cqw;color:var(--gold);text-shadow:.35cqw .35cqw 0 var(--ink),-.2cqw -.2cqw 0 var(--ink),.35cqw -.2cqw 0 var(--ink),-.2cqw .35cqw 0 var(--ink)}
+.chG{position:absolute;left:0;right:0;top:11cqw;display:flex;justify-content:center;gap:2.2cqw}
+.ch{
+  width:20cqw;font:inherit;color:var(--brown);border:0;padding:1.4cqw 1cqw 1.4cqw;cursor:pointer;text-align:center;background:var(--cream);position:relative;
+  box-shadow:0 -.4cqw 0 var(--wood),0 .4cqw 0 var(--wood),-.4cqw 0 0 var(--wood),.4cqw 0 0 var(--wood),0 1.2cqw 0 rgba(10,25,32,.45),inset 0 0 0 .3cqw #f1d9a8;
+  transition:transform .1s steps(2);
+}
+.ch:hover,.ch:focus-visible{transform:translateY(-.7cqw);outline:none}
+.ch img{width:11cqw;display:block;margin:0 auto .4cqw;animation:bob 1.3s steps(2) infinite}
+.ch h3{margin:0;font-size:2.4cqw}
+.ch .ro{font-size:1.4cqw;font-weight:700;color:var(--wood);margin:.2cqw 0 .7cqw}
+.ch .ds{font-size:1.3cqw;line-height:1.25;min-height:4.8cqw}
+.ch.sel{background:#fff7e0;transform:translateY(-1cqw);
+  box-shadow:0 -.5cqw 0 var(--gold),0 .5cqw 0 var(--gold),-.5cqw 0 0 var(--gold),.5cqw 0 0 var(--gold),0 1.4cqw 0 rgba(10,25,32,.45),0 0 3cqw .6cqw rgba(232,182,90,.7)}
+.ch.sel::after{content:"ELEGIDO";position:absolute;top:-1.6cqw;left:50%;transform:translateX(-50%);background:var(--gold);font-size:1.3cqw;font-weight:700;padding:.2cqw 1.2cqw;box-shadow:0 0 0 .25cqw var(--wood)}
+.chB{position:absolute;left:0;right:0;bottom:4cqw;display:flex;justify-content:center;gap:3cqw}
+
+/* ---------- historia ---------- */
+.hud{position:absolute;left:2cqw;right:8cqw;top:1.6cqw;display:flex;align-items:center;gap:1.4cqw;z-index:6}
+.hud .ttl{padding:.6cqw 1.8cqw;font-size:1.6cqw;font-weight:700}
+.hud .pips{display:flex;gap:.6cqw}
+.pip{width:1.3cqw;height:1.3cqw;background:#3a5562;box-shadow:0 0 0 .22cqw var(--cream)}
+.pip.on{background:var(--gold)}
+.hud .sp{flex:1}
+.hud .sc{font-size:1.8cqw;font-weight:700;color:var(--cream);text-shadow:.2cqw .2cqw 0 var(--ink)}
+.spr{position:absolute;bottom:20cqw;width:13cqw;text-align:center;transition:bottom .35s steps(5);z-index:3}
+#s-story.deciding .spr{bottom:31.4cqw}
+.spr.left{left:11cqw}.spr.right{right:11cqw}
+.spr img{width:100%;display:block;animation:bob 1.4s steps(2) infinite;filter:brightness(.82) saturate(.9);transition:filter .2s}
+.spr.talk img{filter:none}
+.spr .nm{position:absolute;left:50%;top:-2.6cqw;transform:translateX(-50%);white-space:nowrap;font-size:1.4cqw;font-weight:700;background:var(--cream);padding:.2cqw 1cqw;box-shadow:0 0 0 .25cqw var(--wood)}
+.spr.hop img{animation:hop .5s steps(3) 2}
+.spr.bad img{animation:shake .3s steps(4) 3}
+.emo{position:absolute;right:-1.4cqw;top:-5.6cqw;min-width:3.6cqw;padding:.4cqw .8cqw;font-size:1.9cqw;font-weight:700;background:var(--cream);box-shadow:0 0 0 .25cqw var(--wood);opacity:0;animation:none}
+.emo.on{opacity:1;animation:hop .6s steps(3) 2}
+#dlg{position:absolute;left:3cqw;right:3cqw;bottom:2.4cqw;min-height:15cqw;padding:2.6cqw 3.4cqw 2.2cqw;z-index:7;cursor:pointer}
+#tag{position:absolute;top:-2.2cqw;left:2.6cqw;padding:.45cqw 2.2cqw;font-size:1.7cqw;font-weight:700;background:var(--gold);
+  box-shadow:0 -.3cqw 0 var(--wood),0 .3cqw 0 var(--wood),-.3cqw 0 0 var(--wood),.3cqw 0 0 var(--wood)}
+#tag.p{background:var(--rose)}#tag.q{background:var(--sage)}#tag.c{background:#b9d0b9}#tag.x{background:#e7d3aa}
+#txt{margin:0;font-size:2.05cqw;line-height:1.38;font-weight:500;min-height:5.6cqw}
+#nxt{position:absolute;right:2.6cqw;bottom:1.2cqw;font-size:1.8cqw;font-weight:700;color:var(--wood);opacity:0}
+#nxt.on{opacity:1;animation:blink .8s steps(2) infinite}
+#opts{margin-top:.6cqw}
+.opt{
+  display:flex;gap:1.4cqw;align-items:flex-start;width:100%;font:inherit;font-weight:500;font-size:1.62cqw;line-height:1.28;text-align:left;
+  color:var(--brown);background:#fff9ea;border:0;margin-top:1cqw;padding:.8cqw 1.6cqw;cursor:pointer;
+  box-shadow:0 -.3cqw 0 var(--sage),0 .3cqw 0 var(--sage),-.3cqw 0 0 var(--sage),.3cqw 0 0 var(--sage),inset 0 -.35cqw 0 #efdcb4;
+  transition:transform .08s steps(2);
+}
+.opt b{flex:none;background:var(--sage);color:var(--cream);width:2.6cqw;height:2.6cqw;display:grid;place-items:center;font-size:1.6cqw;box-shadow:0 0 0 .2cqw var(--woodd)}
+.opt:hover,.opt:focus-visible{background:#ffe9b5;transform:translateX(.6cqw);outline:none;
+  box-shadow:0 -.3cqw 0 var(--gold),0 .3cqw 0 var(--gold),-.3cqw 0 0 var(--gold),.3cqw 0 0 var(--gold),inset 0 -.35cqw 0 #efdcb4}
+.opt:hover b,.opt:focus-visible b{background:var(--gold);color:var(--brown)}
+#pts{position:absolute;right:3cqw;top:-4.4cqw;font-size:2.6cqw;font-weight:700;color:var(--gold);text-shadow:.25cqw .25cqw 0 var(--ink),-.15cqw -.15cqw 0 var(--ink);opacity:0}
+#pts.on{animation:pop 1.1s steps(8) forwards}
+@keyframes pop{0%{opacity:0;transform:translateY(1cqw)}15%{opacity:1}100%{opacity:0;transform:translateY(-2.6cqw)}}
+
+/* ---------- final ---------- */
+.end{width:88cqw;padding:3cqw 3.6cqw 3cqw;display:grid;grid-template-columns:31cqw 1fr;gap:3.2cqw;text-align:left}
+.end .l{text-align:center}
+.end .l img{width:9cqw;animation:hop 1.1s steps(3) infinite;margin-bottom:.4cqw}
+.end .vl{font-size:1.4cqw;font-weight:700;color:var(--wood)}
+.end h2{margin:.2cqw 0;font-size:3.2cqw;line-height:1.05}
+.end h2.ok{color:#3d7a52}.end h2.mid{color:#b4741a}.end h2.no{color:#a8423c}
+.end .vs{font-size:1.5cqw;margin:0}
+.stars{font-size:4.2cqw;letter-spacing:.4cqw;color:var(--gold);text-shadow:.25cqw .25cqw 0 var(--wood);margin:.6cqw 0 0;line-height:1.1}
+.stars i{font-style:normal;color:#cdbb97;text-shadow:.2cqw .2cqw 0 #a99770}
+.end .sco{font-size:2cqw;font-weight:700;margin:.4cqw 0 .8cqw}
+.ban{display:none;margin-bottom:1cqw;font-size:1.4cqw;padding:.4cqw 1.2cqw;background:var(--sage);color:var(--cream);font-weight:700;box-shadow:0 0 0 .25cqw var(--woodd);text-shadow:.15cqw .15cqw 0 var(--woodd)}
+.ban.on{display:inline-block;animation:blink 1s steps(2) infinite}
+.end .bt{display:flex;flex-direction:column;gap:1.6cqw;align-items:stretch}
+.end .bt .btn{font-size:1.8cqw;padding:.9cqw 1.6cqw}
+.end .r h3{margin:0 0 .8cqw;font-size:2cqw;color:var(--wood)}
+.end .r p{margin:0 0 1.4cqw;font-size:1.5cqw;line-height:1.35}
+.end .r ul{margin:0 0 1.2cqw;padding:0;list-style:none}
+.end .r li{position:relative;padding-left:2.4cqw;margin-bottom:.8cqw;font-size:1.45cqw;line-height:1.3}
+.end .r li::before{content:"";position:absolute;left:.3cqw;top:.45cqw;width:.9cqw;height:.9cqw;background:var(--gold);box-shadow:0 0 0 .2cqw var(--wood)}
+.end .r small{display:block;font-size:1.15cqw;color:#7d6a58}
+
+/* ---------- misc ---------- */
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+#snd{position:absolute;right:1.6cqw;top:1.4cqw;z-index:55;width:4.4cqw;height:4.4cqw;padding:0;font-size:2cqw;display:grid;place-items:center}
+#wipe{position:absolute;inset:0;z-index:60;pointer-events:none;display:flex}
+#wipe.cover,#wipe.rev{pointer-events:auto}
+#wipe i{flex:1;background:var(--ink);transform:scaleY(0);transform-origin:top;transition:transform .26s steps(4);transition-delay:calc(var(--i)*32ms);
+  box-shadow:inset 0 -1cqw 0 var(--gold)}
+#wipe.cover i{transform:scaleY(1)}
+#wipe.rev i{transform:scaleY(0);transform-origin:bottom}
+#modal{position:absolute;inset:0;z-index:70;background:rgba(10,25,32,.7);display:none;place-items:center}
+#modal.on{display:grid}
+#modal .panel{width:50cqw;padding:3cqw;text-align:center}
+#mo-msg{margin:0 0 2.4cqw;font-size:2.2cqw;line-height:1.3}
+#toast{position:absolute;left:50%;bottom:7cqw;transform:translateX(-50%);z-index:65;padding:1cqw 2.6cqw;font-size:1.8cqw;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
+#toast.on{opacity:1}
+#rot{display:none;position:fixed;inset:0;z-index:99;background:var(--ink);color:var(--cream);place-items:center;text-align:center;font-size:20px;padding:24px}
+@media (orientation:portrait) and (max-width:700px){#rot{display:grid}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1. INICIO -->
+  <section class="screen active" id="s-start">
+    <canvas class="bg" id="bg-start" width="160" height="90"></canvas>
+    <div class="shade"></div>
+    <div class="titleBox">
+      <canvas id="scaleIcon" width="32" height="24"></canvas>
+      <div class="sub"><span class="rb">NOVELA VISUAL DE DERECHO</span></div>
+      <h1 class="t">CULPABLE <span>O NO</span></h1>
+    </div>
+    <div class="playWrap"><button class="btn big" id="b-play">JUGAR</button></div>
+    <div class="parade" id="parade"></div>
+  </section>
+
+  <!-- 2. REGISTRO -->
+  <section class="screen" id="s-reg">
+    <canvas class="bg" id="bg-reg" width="160" height="90"></canvas>
+    <div class="shade soft"></div>
+    <div class="center panel reg">
+      <h2>¿Cómo te llamas?</h2>
+      <p>El juzgado necesita tu nombre para abrir tu expediente.</p>
+      <label for="name-in" style="position:absolute;left:-999px">Tu nombre</label>
+      <input id="name-in" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Escribe tu nombre">
+      <div id="name-err" role="alert"></div>
+      <div class="row">
+        <button class="btn rose" id="r-back">VOLVER</button>
+        <button class="btn off" id="r-go">CONTINUAR</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. BIENVENIDA -->
+  <section class="screen" id="s-wel">
+    <canvas class="bg" id="bg-wel" width="160" height="90"></canvas>
+    <div class="shade soft"></div>
+    <div class="center panel wel">
+      <div class="pr" id="w-pr"></div>
+      <h2 id="w-name">¡Bienvenido/a!</h2>
+      <p>Hoy aprenderás a conocer tus derechos y a actuar con cabeza fría en situaciones de la vida diaria. Cada decisión cuenta. ¿Terminarás siendo CULPABLE… o NO?</p>
+      <button class="btn big" id="w-go">ENTRAR</button>
+    </div>
+  </section>
+
+  <!-- 4. MENÚ -->
+  <section class="screen" id="s-menu">
+    <canvas class="bg" id="bg-menu" width="160" height="90"></canvas>
+    <div class="shade soft"></div>
+    <div class="top">
+      <img class="av" id="m-av" alt="" style="display:none">
+      <div><div class="nm" id="m-name"></div><div class="pg" id="m-prog"></div></div>
+      <div class="sp"></div>
+      <button class="btn sm sage" id="m-char">PERSONAJE</button>
+      <button class="btn sm rose" id="m-home">INICIO</button>
+    </div>
+    <div class="tabs">
+      <button class="btn sm tab on" id="tab1">NIVEL 1</button>
+      <button class="btn sm tab" id="tab2">NIVEL 2</button>
+    </div>
+    <div class="lvlTitle" id="lvl-title"></div>
+    <div id="cards"></div>
+    <div class="foot">
+      <p>Contenido educativo de carácter general. No sustituye la asesoría de un abogado; las normas cambian según el país.</p>
+      <button class="btn sm rose" id="m-reset">REINICIAR PROGRESO</button>
+    </div>
+  </section>
+
+  <!-- 5. PERSONAJE -->
+  <section class="screen" id="s-char">
+    <canvas class="bg" id="bg-char" width="160" height="90"></canvas>
+    <div class="shade soft"></div>
+    <div class="chT"><h2>ELIGE A TU PERSONAJE</h2></div>
+    <div class="chG" id="ch-grid"></div>
+    <div class="chB">
+      <button class="btn rose" id="c-back">VOLVER</button>
+      <button class="btn off" id="c-go">COMENZAR</button>
+    </div>
+  </section>
+
+  <!-- 6. HISTORIA -->
+  <section class="screen" id="s-story">
+    <canvas class="bg" id="bg-story" width="160" height="90"></canvas>
+    <div class="hud">
+      <div class="ttl panel" id="hud-t"></div>
+      <div class="pips" id="pips"></div>
+      <div class="sp"></div>
+      <div class="sc" id="hud-s"></div>
+      <button class="btn sm rose" id="b-quit">MENÚ</button>
+    </div>
+    <div class="spr left" id="spr-p"><div class="nm" id="nm-p"></div><img id="im-p" alt=""></div>
+    <div class="spr right" id="spr-n"><div class="emo" id="emo"></div><div class="nm" id="nm-n"></div><img id="im-n" alt=""></div>
+    <div id="dlg" class="panel">
+      <div id="tag">NARRADOR</div>
+      <div id="pts"></div>
+      <p id="txt"></p>
+      <div id="opts"></div>
+      <div id="nxt">▼ CONTINUAR</div>
+    </div>
+  </section>
+
+  <!-- 7. FINAL -->
+  <section class="screen" id="s-end">
+    <canvas class="bg" id="bg-end" width="160" height="90"></canvas>
+    <div class="shade"></div>
+    <div class="center panel end">
+      <div class="l">
+        <img id="e-img" alt="">
+        <div class="vl">VEREDICTO DEL JURADO</div>
+        <h2 id="e-v">—</h2>
+        <p class="vs" id="e-vs"></p>
+        <div class="stars" id="e-stars"></div>
+        <div class="sco" id="e-sc"></div>
+        <div class="ban" id="e-ban"></div>
+        <div class="bt">
+          <button class="btn" id="e-next">SIGUIENTE HISTORIA</button>
+          <button class="btn sage" id="e-again">REPETIR</button>
+          <button class="btn rose" id="e-menu">VOLVER AL MENÚ</button>
+        </div>
+      </div>
+      <div class="r">
+        <h3>¿Qué dice el Derecho?</h3>
+        <p id="e-ex"></p>
+        <h3>Lo que te llevas</h3>
+        <ul id="e-ls"></ul>
+        <small>Contenido educativo general. Consulta siempre las normas de tu país.</small>
+      </div>
+    </div>
+  </section>
+
+  <canvas id="fx" width="320" height="180"></canvas>
+  <button class="btn sm" id="snd" aria-label="Sonido">♪</button>
+  <div id="toast" class="panel"></div>
+  <div id="wipe"></div>
+  <div id="modal"><div class="panel"><p id="mo-msg"></p><div class="row" id="mo-btns"></div></div></div>
+</div>
+<div id="rot">Gira tu dispositivo en horizontal para jugar CULPABLE O NO.</div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const C={pet:'#244653',petD:'#1a3540',cream:'#FFF0D5',wood:'#754C35',woodD:'#53331f',woodL:'#9a6a49',gold:'#E8B65A',sage:'#8BA58B',rose:'#E9A8A8',ink:'#14303a'};
+const R=(g,x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+
+/* ================= PERSISTENCIA ================= */
+const KEY='culpableono_v1';
+let G={name:'',char:null,done:{},mute:false};
+try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j&&typeof j==='object'){G=Object.assign(G,j);if(!G.done||typeof G.done!=='object')G.done={}}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){}};
+
+/* ================= SONIDO ================= */
+let ac=null;
+function blip(f=520,d=.05,v=.03){
+  if(G.mute)return;
+  try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.value=v;
+    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}
+}
+function setSnd(){$('snd').textContent=G.mute?'✕':'♪';$('snd').style.opacity=G.mute?.6:1}
+
+/* ================= PIXEL ART: FONDOS ================= */
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
+const rng=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+function bands(g,y0,y1,a,b,st){for(let y=y0;y<y1;y+=st)R(g,0,y,160,st,mix(a,b,(y-y0)/(y1-y0)))}
+function blob(g,cx,cy,r,c){for(let dy=-r;dy<=r;dy++){const w=Math.floor(Math.sqrt(r*r-dy*dy));R(g,cx-w,cy+dy,w*2+1,1,c)}}
+function room(g,wall,wallD,wain,fA,fB){
+  R(g,0,0,160,90,wall);
+  for(let x=0;x<160;x+=10)R(g,x,0,1,46,wallD);
+  R(g,0,46,160,2,C.woodL);R(g,0,48,160,14,wain);
+  for(let x=0;x<160;x+=14)R(g,x,49,1,12,'rgba(0,0,0,.18)');
+  R(g,0,62,160,28,fA);
+  for(let y=62;y<90;y+=4){R(g,0,y,160,1,fB);for(let x=((y/4)%2)*9;x<160;x+=18)R(g,x,y,1,4,fB)}
+  R(g,0,62,160,2,'rgba(0,0,0,.25)');
+}
+function glow(g,x,y,w,h,a){g.globalAlpha=a;R(g,x,y,w,h,'#FFE9A8');g.globalAlpha=1}
+function win(g,x,y,w,h){
+  R(g,x-2,y-2,w+4,h+4,C.cream);R(g,x,y,w,h,'#F6D58E');R(g,x,y,w,Math.floor(h/3),'#FBE6B0');
+  R(g,x+Math.floor(w/2)-1,y,2,h,C.cream);R(g,x,y+Math.floor(h/2)-1,w,2,C.cream);R(g,x-3,y+h+2,w+6,2,C.woodL);
+}
+function col(g,x,w,y0,y1){
+  R(g,x-1,y0,w+2,3,C.cream);R(g,x,y0+3,w,y1-y0-6,C.cream);R(g,x+w-2,y0+3,2,y1-y0-6,'#e3cfa6');
+  R(g,x+2,y0+3,1,y1-y0-6,'#fff8e8');R(g,x-1,y1-3,w+2,3,C.cream);R(g,x-2,y1,w+4,2,'#d9c08f');
+}
+function books(g,x,y,w,h,seed){
+  const r=rng(seed),cols=[C.rose,C.gold,C.sage,'#c4574a','#4f8095',C.cream,'#7a5a9c'];let cx=x;
+  while(cx<x+w-1){const bw=2+Math.floor(r()*2),bh=h-2-Math.floor(r()*4);R(g,cx,y+h-bh,Math.min(bw,x+w-cx),bh,cols[Math.floor(r()*cols.length)]);cx+=bw}
+}
+function shelf(g,x,y,w,h,rows,seed){
+  R(g,x,y,w,h,C.woodD);const rh=Math.floor(h/rows);
+  for(let i=0;i<rows;i++){R(g,x+1,y+1+i*rh,w-2,rh-1,'#3b2315');books(g,x+2,y+2+i*rh,w-4,rh-3,seed+i);R(g,x,y+(i+1)*rh-1,w,2,C.wood)}
+  R(g,x,y,w,1,C.woodL);
+}
+function plant(g,x,y){R(g,x,y,8,6,C.rose);R(g,x,y,8,1,'#f4c4c4');blob(g,x+4,y-4,4,C.sage);blob(g,x+1,y-2,3,'#6f9a74');blob(g,x+7,y-2,3,'#6f9a74')}
+function tree(g,x,y){R(g,x+8,y+22,5,22,C.wood);blob(g,x+10,y+10,12,'#6f9a74');blob(g,x+6,y+14,8,'#7fa985');blob(g,x+15,y+8,6,'#82ac88');R(g,x+4,y+6,3,2,'#a9cfa9')}
+
+const BG={
+court(g){
+  room(g,C.pet,C.petD,C.wood,'#9a6a49','#85593d');
+  g.globalAlpha=.1;R(g,36,10,28,52,'#FFE9A8');R(g,96,10,28,52,'#FFE9A8');g.globalAlpha=1;
+  win(g,40,10,20,30);win(g,100,10,20,30);
+  shelf(g,16,14,18,46,4,5);shelf(g,126,14,18,46,4,17);
+  col(g,4,10,0,64);col(g,146,10,0,64);
+  R(g,68,3,24,13,C.rose);R(g,68,3,24,1,C.gold);R(g,68,15,24,1,C.gold);R(g,79,5,2,9,C.gold);R(g,74,6,12,1,C.gold);
+  R(g,68,30,24,24,C.woodD);R(g,70,32,20,22,'#8d3f4a');R(g,70,32,20,2,'#a65562');
+  R(g,50,52,60,14,C.wood);R(g,50,52,60,2,C.woodL);R(g,50,64,60,2,C.woodD);
+  for(let i=0;i<7;i++){R(g,54+i*8,57,6,7,C.woodD);R(g,55+i*8,58,4,5,'#8a5a3b')}
+  R(g,79,44,2,8,C.gold);R(g,70,44,20,1,C.gold);R(g,69,45,1,5,C.gold);R(g,90,45,1,5,C.gold);R(g,67,50,6,1,C.gold);R(g,87,50,6,1,C.gold);
+  R(g,98,49,7,3,C.woodL);R(g,100,46,3,3,C.woodL);
+  R(g,4,76,46,6,C.wood);R(g,4,76,46,1,C.woodL);R(g,4,82,46,2,C.woodD);
+  R(g,110,76,46,6,C.wood);R(g,110,76,46,1,C.woodL);R(g,110,82,46,2,C.woodD);
+},
+shop(g){
+  room(g,C.sage,'#7a947a',C.wood,'#f0dfb8','#dcc79a');
+  for(let y=62;y<90;y+=4)for(let x=0;x<160;x+=8)R(g,x+((y/4)%2?4:0),y,4,4,'#fbeccb');
+  shelf(g,6,12,44,36,3,31);
+  win(g,64,16,24,22);
+  for(let i=0;i<8;i++){R(g,60+i*4,8,4,6,i%2?C.cream:C.rose);R(g,60+i*4,14,4,2,i%2?C.cream:C.rose)}
+  R(g,108,10,1,9,C.woodD);R(g,130,10,1,9,C.woodD);R(g,106,18,26,14,C.cream);R(g,106,18,26,1,C.wood);R(g,106,31,26,1,C.wood);
+  for(let i=0;i<8;i++){R(g,115+i,20+i,2,1,'#c4574a');R(g,123-i,20+i,2,1,'#c4574a')}
+  R(g,92,56,64,22,C.wood);R(g,90,52,68,5,C.woodL);R(g,92,76,64,2,C.woodD);
+  for(let i=0;i<6;i++){R(g,96+i*10,61,8,12,C.woodD);R(g,97+i*10,62,6,10,'#8a5a3b')}
+  R(g,134,40,16,12,C.gold);R(g,136,42,12,5,'#3b6a7a');R(g,138,49,8,2,C.woodD);
+  R(g,100,44,10,8,C.rose);R(g,112,46,8,6,C.cream);R(g,102,40,6,4,C.sage);
+  plant(g,12,56);
+},
+flat(g){
+  room(g,'#F1DCB2','#E7CF9F',C.sage,'#a06f4c','#8a5c3f');
+  win(g,22,12,24,28);R(g,14,8,8,38,C.rose);R(g,46,8,8,38,C.rose);R(g,12,7,44,2,C.gold);R(g,14,8,8,1,'#f4c4c4');R(g,46,8,8,1,'#f4c4c4');
+  R(g,70,14,14,18,C.wood);R(g,72,16,10,14,C.sage);blob(g,77,23,3,C.gold);
+  R(g,90,18,18,12,C.wood);R(g,92,20,14,8,'#6fa3b0');R(g,92,25,14,3,'#7da07d');
+  R(g,124,8,28,56,C.woodD);R(g,126,10,24,52,C.wood);R(g,129,13,8,22,C.woodD);R(g,139,13,8,22,C.woodD);R(g,129,38,8,20,C.woodD);R(g,139,38,8,20,C.woodD);blob(g,146,37,2,C.gold);
+  R(g,34,70,92,16,C.rose);R(g,36,72,88,12,'#f3c3c3');for(let x=38;x<122;x+=6)R(g,x,72,3,12,C.rose);
+  R(g,64,58,32,3,C.woodL);R(g,66,61,3,14,C.wood);R(g,91,61,3,14,C.wood);
+  R(g,72,52,8,6,C.cream);R(g,70,53,2,2,C.cream);R(g,80,54,3,1,C.cream);R(g,74,50,4,2,C.gold);R(g,86,54,4,4,C.cream);
+  plant(g,8,56);R(g,110,50,2,12,C.gold);R(g,106,46,10,5,C.cream);
+},
+park(g){
+  bands(g,0,56,'#7fb7be','#FFF0D5',4);
+  blob(g,128,18,9,'#F6D58E');blob(g,128,18,6,C.gold);
+  R(g,20,14,18,4,C.cream);R(g,24,11,10,3,C.cream);R(g,70,24,22,4,C.cream);R(g,74,21,12,3,C.cream);
+  blob(g,40,62,26,'#6f8f78');blob(g,122,64,32,'#7a9a82');
+  R(g,0,56,160,34,C.sage);R(g,0,56,160,2,'#a2bba2');
+  for(let y=58;y<90;y++){const w=Math.floor(16+(y-58)*1.5);R(g,80-Math.floor(w/2),y,w,1,'#e6d2a8')}
+  tree(g,6,14);tree(g,134,18);tree(g,104,26);
+  R(g,112,66,28,3,C.wood);R(g,112,62,28,2,C.woodL);R(g,114,69,2,6,C.woodD);R(g,136,69,2,6,C.woodD);
+  const r=rng(7);for(let i=0;i<34;i++){const x=Math.floor(r()*160),y=60+Math.floor(r()*30);if(x>56&&x<104&&y<84)continue;R(g,x,y,1,1,r()<.5?C.rose:C.gold)}
+  R(g,60,52,2,0,C.wood);
+},
+school(g){
+  room(g,C.pet,C.petD,C.wood,'#b07c55','#946243');
+  R(g,44,10,62,32,C.wood);R(g,46,12,58,28,'#1f4a3d');
+  R(g,50,18,22,1,C.cream);R(g,50,24,34,1,C.cream);R(g,50,30,18,1,C.cream);R(g,88,18,10,1,C.gold);R(g,74,30,16,1,C.rose);
+  R(g,46,40,58,2,C.woodL);R(g,52,38,6,2,C.cream);
+  win(g,118,12,24,26);
+  for(let i=0;i<4;i++){R(g,6+i*9,18,8,38,C.sage);R(g,6+i*9,18,8,2,'#a2bba2');for(let k=0;k<3;k++)R(g,8+i*9,22+k*2,4,1,'#5f7a5f');R(g,12+i*9,36,1,4,C.gold)}
+  blob(g,112,6,4,C.cream);R(g,112,4,1,3,C.ink);R(g,112,6,2,1,C.ink);
+  R(g,20,66,40,4,C.woodL);R(g,22,70,2,14,C.woodD);R(g,56,70,2,14,C.woodD);
+  R(g,100,66,40,4,C.woodL);R(g,102,70,2,14,C.woodD);R(g,136,70,2,14,C.woodD);
+  R(g,34,62,7,4,C.ink);R(g,35,63,5,2,'#8fd0d8');R(g,64,70,3,3,C.rose);
+},
+street(g){
+  bands(g,0,66,'#0f2530','#2d5666',4);
+  const r=rng(11);for(let i=0;i<34;i++)R(g,Math.floor(r()*160),Math.floor(r()*30),1,1,r()<.5?C.cream:C.gold);
+  blob(g,134,14,7,C.cream);blob(g,137,12,6,'#17323d');
+  const cols=['#1b3946','#20414f'];let x=-4;
+  while(x<160){const w=18+Math.floor(r()*10),h=26+Math.floor(r()*24);R(g,x,64-h,w,h,cols[Math.floor(r()*2)]);
+    for(let wy=64-h+4;wy<60;wy+=7)for(let wx=x+3;wx<x+w-4;wx+=6)R(g,wx,wy,3,4,r()<.5?C.gold:'#12303b');x+=w+1}
+  R(g,0,64,160,6,'#4d6a76');R(g,0,64,160,1,'#6f8c97');R(g,0,70,160,20,'#1d3540');
+  for(let dx=4;dx<160;dx+=24)R(g,dx,80,12,2,C.cream);
+  g.globalAlpha=.18;blob(g,100,30,15,C.gold);g.globalAlpha=1;
+  R(g,104,24,3,42,'#0e2028');R(g,96,22,14,3,'#0e2028');blob(g,98,26,3,C.gold);
+  R(g,12,58,38,10,'#e8e0d0');R(g,18,51,24,8,'#e8e0d0');R(g,20,53,8,5,'#6fa3b0');R(g,30,53,8,5,'#6fa3b0');
+  R(g,10,64,42,3,C.pet);R(g,24,48,4,3,'#c4574a');R(g,30,48,4,3,'#4f8095');
+  blob(g,20,69,4,'#0e2028');blob(g,42,69,4,'#0e2028');blob(g,20,69,2,'#6f8c97');blob(g,42,69,2,'#6f8c97');
+},
+cafe(g){
+  room(g,'#8a5c3f','#7b4f36',C.woodD,'#f0dfb8','#dcc79a');
+  for(let y=62;y<90;y+=4)for(let x=0;x<160;x+=8)R(g,x+((y/4)%2?4:0),y,4,4,'#a9c2a9');
+  for(const x of [30,80,130]){R(g,x,0,1,12,C.woodD);g.globalAlpha=.2;blob(g,x,22,13,C.gold);g.globalAlpha=1;R(g,x-5,12,11,4,C.gold);R(g,x-3,16,7,2,'#f6d58e')}
+  R(g,56,20,48,26,C.ink);R(g,54,18,52,2,C.gold);R(g,54,46,52,2,C.gold);
+  for(let i=0;i<4;i++){R(g,60,26+i*5,18+((i*5)%12),1,C.cream);R(g,92,26+i*5,8,1,C.gold)}
+  win(g,8,14,30,26);
+  R(g,100,56,56,22,C.cream);R(g,98,52,60,5,C.woodL);R(g,100,76,56,2,'#d9c08f');
+  for(let i=0;i<5;i++)R(g,104+i*10,61,8,12,'#f1dcb2');
+  R(g,120,38,24,14,'#9fb2b8');R(g,122,40,6,4,C.gold);R(g,132,44,3,8,C.ink);R(g,138,40,4,6,C.rose);
+  R(g,108,48,4,4,C.cream);R(g,114,48,4,4,C.cream);
+  R(g,14,66,24,3,C.woodL);R(g,24,69,3,12,C.woodD);R(g,18,80,14,2,C.woodD);
+  R(g,52,66,24,3,C.woodL);R(g,62,69,3,12,C.woodD);R(g,56,80,14,2,C.woodD);
+  plant(g,86,66);
+}
+};
+const bgCache={};
+function getBG(k){if(bgCache[k])return bgCache[k];const c=document.createElement('canvas');c.width=160;c.height=90;const g=c.getContext('2d');BG[k](g);return bgCache[k]=c}
+function paint(cv,k){const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(getBG(k),0,0)}
+
+/* ================= PIXEL ART: PERSONAJES CHIBI ================= */
+function outline(cv,col){
+  const g=cv.getContext('2d'),w=cv.width,h=cv.height,d=g.getImageData(0,0,w,h).data;
+  const A=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&d[(y*w+x)*4+3]>40;
+  g.fillStyle=col;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(!A(x,y)&&(A(x-1,y)||A(x+1,y)||A(x,y-1)||A(x,y+1)))g.fillRect(x,y,1,1);
+}
+function chibi(o){
+  const cv=document.createElement('canvas');cv.width=24;cv.height=32;const g=cv.getContext('2d');
+  const sk=o.skin||'#F8D5B4',hr=o.hair,hl='rgba(255,255,255,.32)',cl=o.cloth,st=o.style||'short',acc=o.acc||[];
+  if(st==='twin'){R(g,2,8,4,11,hr);R(g,18,8,4,11,hr);R(g,3,18,2,2,hr);R(g,19,18,2,2,hr)}
+  if(st==='long'){R(g,4,7,16,16,hr)}
+  if(st==='bob'){R(g,4,6,16,11,hr)}
+  R(g,5,3,14,12,hr);
+  R(g,9,25,3,3,sk);R(g,12,25,3,3,sk);R(g,8,28,4,2,C.wood);R(g,12,28,4,2,C.wood);
+  if(acc.includes('robe')){R(g,6,16,12,12,cl);R(g,4,17,2,8,cl);R(g,18,17,2,8,cl);R(g,6,25,12,3,'rgba(0,0,0,.2)');R(g,11,18,2,10,'rgba(255,255,255,.18)')}
+  else{R(g,7,16,10,9,cl);R(g,7,22,10,3,'rgba(0,0,0,.18)');R(g,5,17,2,6,cl);R(g,17,17,2,6,cl)}
+  R(g,5,23,2,2,sk);R(g,17,23,2,2,sk);
+  R(g,6,6,12,10,sk);g.clearRect(6,15,1,1);g.clearRect(17,15,1,1);
+  R(g,6,4,12,4,hr);R(g,6,8,2,5,hr);R(g,16,8,2,5,hr);R(g,8,8,3,1,hr);R(g,13,8,3,1,hr);R(g,9,5,4,1,hl);
+  R(g,8,10,2,3,C.ink);R(g,14,10,2,3,C.ink);R(g,8,10,1,1,'#fff');R(g,14,10,1,1,'#fff');
+  R(g,7,13,2,1,C.rose);R(g,15,13,2,1,C.rose);R(g,11,14,2,1,'#a8564a');
+  R(g,10,16,4,2,C.cream);
+  if(acc.includes('robe')){R(g,9,16,2,5,C.cream);R(g,13,16,2,5,C.cream)}
+  if(acc.includes('apron')){R(g,8,18,8,8,C.cream);R(g,8,18,8,1,'#e3cfa6');R(g,10,21,4,2,'#e3cfa6')}
+  if(acc.includes('bow')){R(g,16,3,4,3,C.rose);R(g,17,4,2,1,C.cream)}
+  if(acc.includes('bun')){R(g,10,1,4,3,hr);R(g,11,1,2,1,hl)}
+  if(acc.includes('mustache'))R(g,9,13,6,1,'#6b5646');
+  if(acc.includes('glasses')){const f=C.gold;R(g,7,9,5,1,f);R(g,7,13,5,1,f);R(g,7,9,1,5,f);R(g,11,9,1,5,f);R(g,12,10,1,1,f);R(g,12,9,5,1,f);R(g,12,13,5,1,f);R(g,12,9,1,5,f);R(g,16,9,1,5,f)}
+  if(acc.includes('hat')){const h=o.hatC||C.gold;R(g,5,2,14,3,h);R(g,3,5,18,1,h);R(g,5,4,14,1,C.wood);R(g,7,2,4,1,'rgba(255,255,255,.35)')}
+  if(acc.includes('cap')){R(g,5,2,14,3,C.pet);R(g,4,5,16,1,C.pet);R(g,11,3,2,1,C.gold);R(g,5,4,14,1,'#14303a')}
+  if(acc.includes('badge'))R(g,14,18,2,2,C.gold);
+  outline(cv,C.ink);return cv;
+}
+const CHARS={
+  lia:{name:'Lía',role:'Aprendiz de abogada',desc:'Curiosa y valiente. Nunca sale sin su libro de leyes.',o:{hair:'#E58FA3',cloth:'#8BA58B',style:'twin',acc:['bow']}},
+  teo:{name:'Teo',role:'Juez en prácticas',desc:'Sereno y justo. Siempre escucha antes de decidir.',o:{hair:'#5a3a28',cloth:'#355f73',style:'short',acc:['robe']}},
+  mina:{name:'Mina',role:'Detective legal',desc:'Observadora. Encuentra las pruebas que otros pasan por alto.',o:{hair:'#7da07d',cloth:'#754C35',style:'bob',acc:['hat'],hatC:'#E8B65A'}},
+  kai:{name:'Kai',role:'Estudiante de Derecho',desc:'Soñador y estudioso. Siempre pregunta «¿por qué?».',o:{hair:'#2b5566',cloth:'#E8B65A',style:'short',acc:['glasses']}}
+};
+const NPC={
+  tomas:{name:'Don Tomás',o:{hair:'#9b8a78',cloth:'#754C35',style:'short',skin:'#F0C9A4',acc:['mustache','apron']}},
+  rosa:{name:'Doña Rosa',o:{hair:'#c9c0b4',cloth:'#E9A8A8',style:'bob',skin:'#F3CDAA',acc:['bun','bow']}},
+  vera:{name:'Agente Vera',o:{hair:'#3b2a20',cloth:'#2f5f73',style:'long',acc:['cap','badge']}},
+  noa:{name:'Noa',o:{hair:'#c98f5a',cloth:'#FFF0D5',style:'long'}},
+  dani:{name:'Dani',o:{hair:'#2b2b3a',cloth:'#8BA58B',style:'short'}},
+  vega:{name:'Oficial Vega',o:{hair:'#3b2a20',cloth:'#2f5f73',style:'short',skin:'#E9BE97',acc:['cap','badge']}},
+  lucero:{name:'Lucero',o:{hair:'#5a3a28',cloth:'#E9A8A8',style:'long',acc:['apron','bun']}}
+};
+const spCv={},spUrl={};
+function spriteCv(k){if(spCv[k])return spCv[k];const [t,id]=k.split(':');return spCv[k]=chibi((t==='p'?CHARS:NPC)[id].o)}
+function spriteURL(k){return spUrl[k]||(spUrl[k]=spriteCv(k).toDataURL())}
+function spriteImg(k,cls){const i=new Image();i.src=spriteURL(k);i.alt='';if(cls)i.className=cls;return i}
+
+/* ================= HISTORIAS ================= */
+const STORIES=[
+{id:'tienda',level:1,title:'La tienda del barrio',topic:'Derechos del consumidor',bg:'shop',npc:'tomas',
+ steps:[
+  {s:'',t:"{n} compró unos audífonos en la tienda «Rincón Tech». Al llegar a casa descubre que uno de los lados no suena. Regresa a la tienda con su boleta en la mano."},
+  {s:'n',t:"Buenas, buenas... ¿otra vez por aquí? Ah, los audífonos. Mmm, no suenan, ¿eh?"},
+  {s:'n',t:"Mira, aquí no hay devoluciones. Lo dice el cartel: «NO SE ACEPTAN DEVOLUCIONES». Lo que se vende, se vende.",mood:'bad'},
+  {q:"¿Cómo respondes a Don Tomás?",o:[
+    {t:"Muestro mi boleta y explico con calma que el producto está defectuoso y que tengo derecho a reparación, cambio o devolución.",p:10,m:'ok',f:"Don Tomás lee la boleta y se rasca la cabeza. Un cartel de «no hay devoluciones» no puede quitarte derechos cuando el producto viene con fallas."},
+    {t:"Grito y amenazo con romper el mostrador si no me devuelven el dinero.",p:0,m:'bad',f:"Los gritos y las amenazas pueden meterte en un problema legal y no resuelven nada. Además, pierdes la razón que tenías."},
+    {t:"Me voy sin decir nada: seguro no vale la pena discutir.",p:3,m:'meh',f:"Evitaste el conflicto, pero renunciaste a un derecho que sí tenías. Reclamar con respeto es perfectamente válido."}]},
+  {s:'n',t:"Está bien, está bien... Pero hoy no tengo plata para devolverte. Te daré un vale y listo, no hace falta anotar nada.",mood:'meh'},
+  {q:"Don Tomás ofrece un vale y no quiere registrar tu reclamo. ¿Qué haces?",o:[
+    {t:"Pido el libro de reclamaciones o un registro escrito, y solicito reparación, cambio o devolución, según corresponda.",p:10,m:'ok',f:"¡Bien! Dejar el reclamo por escrito crea una prueba formal y obliga a la tienda a responder en un plazo."},
+    {t:"Acepto el vale sin leerlo ni guardar ningún comprobante.",p:3,m:'meh',f:"Sin leer las condiciones podrías quedarte con un vale vencido o limitado. Revisa siempre qué estás aceptando."},
+    {t:"Rompo la boleta y me voy dando un portazo.",p:0,m:'bad',f:"¡Ay! La boleta era tu prueba de compra. Sin ella, reclamar se vuelve mucho más difícil."}]},
+  {s:'n',t:"Bueno... lo anotaré. Vuelve en unos días y vemos qué se puede hacer.",mood:'ok'},
+  {q:"Antes de irte, ¿qué guardas como respaldo de tu reclamo?",o:[
+    {t:"La boleta, una copia del reclamo y fotos o un video del defecto.",p:10,m:'ok',f:"Perfecto: comprobante, copia del reclamo y evidencia del defecto forman un expediente sólido."},
+    {t:"Solo la caja de los audífonos.",p:4,m:'meh',f:"La caja ayuda, pero no prueba la compra ni el reclamo. Faltan documentos clave."},
+    {t:"Nada, confío en la palabra de Don Tomás.",p:0,m:'bad',f:"La palabra se la lleva el viento. Sin pruebas, es tu versión contra la suya."}]},
+  {s:'',t:"Pasan los días. La tienda no responde mensajes ni llamadas, y el plazo para contestar ya venció."},
+  {q:"La tienda guarda silencio. ¿Cuál es tu siguiente paso?",o:[
+    {t:"Presento mi reclamo con todas las pruebas ante la autoridad de protección al consumidor (en Perú, INDECOPI).",p:10,m:'ok',f:"Exacto. Si la tienda no responde, existen autoridades que reciben denuncias de consumidores y pueden sancionar a los proveedores."},
+    {t:"Publico insultos y los datos personales de Don Tomás en redes sociales.",p:0,m:'bad',f:"Exponer datos personales o insultar puede convertirte en denunciado por difamación o por violar su privacidad."},
+    {t:"Lo dejo pasar: ya es mucho trámite.",p:2,m:'meh',f:"Es comprensible el cansancio, pero rendirte deja el problema sin resolver y sin consecuencias para quien falló."}]}
+ ],
+ explain:"Los consumidores tienen derecho a productos seguros y en buen estado. Si el producto sale defectuoso, puedes pedir reparación, cambio o devolución, aunque un cartel diga «no hay devoluciones». Para reclamar, conserva comprobantes y usa el libro de reclamaciones o el canal formal; si no responden, puedes acudir a la autoridad de protección al consumidor.",
+ lessons:["Un cartel de «no hay devoluciones» no anula tus derechos como consumidor.","Guarda boleta, fotos y una copia de tu reclamo: son tus pruebas.","Reclama con respeto; si no hay respuesta, acude a la autoridad competente."]},
+
+{id:'alquiler',level:1,title:'El contrato de alquiler',topic:'Contratos y vivienda',bg:'flat',npc:'rosa',
+ steps:[
+  {s:'',t:"{n} encontró un departamento pequeño y luminoso. Doña Rosa, la casera, lo recibe con té caliente y una hoja de papel."},
+  {s:'n',t:"¡Es un sol de cuarto! Solo firma aquí, aquí y aquí. No hace falta leer nada, es el formato de siempre.",mood:'meh'},
+  {q:"Doña Rosa te pasa el contrato y una lapicera. ¿Qué haces?",o:[
+    {t:"Pido llevarme el contrato para leerlo con calma y consultarlo con alguien de confianza antes de firmar.",p:10,m:'ok',f:"Muy bien: firmar con prisa es el error más común. Un contrato obliga a ambas partes, así que conviene entenderlo completo."},
+    {t:"Lo leo ahí mismo y pregunto lo que no entiendo.",p:7,m:'ok',f:"Buena actitud. Leer y preguntar es clave, aunque con más tiempo podrías haberlo revisado mejor."},
+    {t:"Firmo rápido para que nadie más se quede con el departamento.",p:0,m:'bad',f:"La presión del momento es justo lo que provoca problemas. Una vez firmado, quedas obligado a lo que diga."}]},
+  {s:'',t:"El contrato dice: renta de 1200 al mes, garantía de dos meses y una cláusula curiosa: «la propietaria podrá ingresar al departamento cuando lo desee, sin previo aviso»."},
+  {s:'n',t:"Eso es por seguridad, ¿sabes? Nunca ha pasado nada. ¿Verdad que no hay problema?"},
+  {q:"¿Qué haces con esa cláusula?",o:[
+    {t:"Pido modificarla: la propietaria solo podrá entrar con aviso previo, salvo emergencia real, y que el cambio quede por escrito.",p:10,m:'ok',f:"Correcto. Tu vivienda es tu espacio privado; las cláusulas que lo ignoran pueden negociarse e incluso ser cuestionadas."},
+    {t:"Acepto sin discutir: no quiero ponerme en problemas.",p:2,m:'meh',f:"Callar hoy puede costarte intimidad mañana. Negociar con respeto es parte de firmar un contrato."},
+    {t:"Digo que es ilegal, rompo el papel y me voy furioso/a.",p:3,m:'bad',f:"Tenías razón en cuestionarla, pero sin explicar ni proponer una solución cerraste toda posibilidad de acuerdo."}]},
+  {s:'n',t:"Perfecto, perfecto. Y la garantía de dos meses me la entregas hoy. La devuelvo cuando me parezca.",mood:'meh'},
+  {q:"Doña Rosa pide la garantía. ¿Cómo procedes?",o:[
+    {t:"Pido que el contrato fije plazo y condiciones de devolución, y exijo un recibo firmado del pago.",p:10,m:'ok',f:"Así se hace: lo pactado por escrito y con recibo evita discusiones y protege tu dinero."},
+    {t:"Pago, pero no pregunto por la devolución.",p:4,m:'meh',f:"Tienes el pago, pero no la certeza de recuperar tu garantía. Fíjalo por escrito antes de entregarla."},
+    {t:"Pago en efectivo sin recibo: ella parece de confianza.",p:0,m:'bad',f:"Sin recibo no puedes probar que pagaste. La confianza no reemplaza al papel."}]},
+  {s:'',t:"Pasan tres meses. Una tubería vieja del baño empieza a gotear y la pared se humedece."},
+  {q:"Hay una gotera por una tubería antigua. ¿Qué haces?",o:[
+    {t:"Aviso por escrito a Doña Rosa con fotos y pido que la repare, guardando la copia del mensaje.",p:10,m:'ok',f:"Perfecto. Avisar por escrito deja constancia y, por lo general, el propietario debe encargarse de reparaciones estructurales."},
+    {t:"Arreglo todo con mi dinero sin avisar y luego pido un descuento.",p:4,m:'meh',f:"Intentaste ayudar, pero sin avisar ni acordar antes, podrías no recuperar ese gasto."},
+    {t:"Dejo de pagar la renta como castigo hasta que la arreglen.",p:0,m:'bad',f:"Dejar de pagar por tu cuenta te pone en incumplimiento y puede llevar a un desalojo. Los reclamos se hacen por vías formales."}]}
+ ],
+ explain:"El contrato de alquiler es un acuerdo que obliga a ambas partes. Conviene que conste por escrito y leerlo completo antes de firmar. Las cláusulas abusivas o que vulneran derechos básicos, como la privacidad de tu vivienda, pueden cuestionarse. La garantía y los pagos deben quedar con recibo, y los problemas se comunican por escrito. Suspender el pago por tu cuenta puede ponerte en incumplimiento.",
+ lessons:["Nunca firmes un contrato con prisa: léelo, pregunta y negocia.","Todo pago y toda garantía debe tener recibo firmado.","Los reclamos se hacen por escrito, sin dejar de cumplir tus obligaciones."]},
+
+{id:'billetera',level:1,title:'La billetera en la banca',topic:'Bienes perdidos y honestidad',bg:'park',npc:'vera',
+ steps:[
+  {s:'',t:"Es una tarde soleada. En una banca del parque, {n} encuentra una billetera olvidada. Dentro hay documentos, tarjetas y algo de dinero."},
+  {q:"Nadie parece estar cerca. ¿Qué decides hacer?",o:[
+    {t:"La llevo a la comisaría o la entrego a una autoridad, y pido que quede constancia del hallazgo.",p:10,m:'ok',f:"Muy bien: entregar el bien perdido a la autoridad te protege y permite que vuelva a su dueño."},
+    {t:"Me la llevo a casa por si alguien la reclama.",p:4,m:'meh',f:"Tu intención es buena, pero guardarla sin avisar a nadie puede parecer que te la quedaste."},
+    {t:"Me quedo con el dinero y tiro lo demás.",p:0,m:'bad',f:"Quedarte con un bien perdido, o con parte de él, puede constituir un delito. Además, tiraste documentos que alguien necesitará."}]},
+  {s:'',t:"Por suerte, a pocos metros patrulla la Agente Vera, que se acerca al verte con la billetera en la mano."},
+  {s:'n',t:"Buenas tardes. ¿Encontraste eso en la banca? Vamos a registrar el hallazgo con calma.",mood:'ok'},
+  {s:'',t:"Mientras esperas, un amigo que pasaba por ahí susurra: «¡Mira, tiene tarjetas! Hagamos una compra rápida, nadie se va a enterar»."},
+  {q:"¿Qué le respondes a tu amigo?",o:[
+    {t:"Le digo que no: usar esas tarjetas sería fraude y un delito, aunque sea algo pequeño.",p:10,m:'ok',f:"Exacto. Usar una tarjeta ajena es delito sin importar el monto, y dejaría registros con tu nombre."},
+    {t:"Le digo que no, pero sin explicarle nada.",p:6,m:'meh',f:"Hiciste lo correcto al negarte. Explicar por qué ayuda a que tu amigo tampoco cometa un error."},
+    {t:"Compro algo pequeño: total, es poquito.",p:0,m:'bad',f:"No existe el «poquito» ante la ley: usar una tarjeta ajena es fraude, y las cámaras y los registros te delatarían."}]},
+  {s:'n',t:"El dueño de la billetera ya llegó, muy nervioso. Cuéntale con claridad cómo la encontraste.",mood:'meh'},
+  {q:"El dueño te pregunta qué pasó con su billetera. ¿Qué respondes?",o:[
+    {t:"Cuento todo con honestidad: dónde la encontré, que la entregué completa y que no faltó nada.",p:10,m:'ok',f:"La verdad te protege. Un relato claro y consistente deja ver que actuaste de buena fe."},
+    {t:"Evito responder y me voy sin decir nada.",p:3,m:'meh',f:"Irte sin explicar puede generar sospechas innecesarias. Es mejor aclarar lo ocurrido."},
+    {t:"Digo que ya estaba vacía, para evitar problemas.",p:0,m:'bad',f:"Mentir complica todo: si se descubre, podrían acusarte de haber tomado algo y de faltar a la verdad."}]},
+  {s:'n',t:"Gracias por tu honestidad. El dueño quiere agradecerte. Ten presente que aceptar un agradecimiento es distinto a exigir un pago.",mood:'ok'},
+  {q:"El dueño te ofrece un gesto de agradecimiento. ¿Cómo reaccionas?",o:[
+    {t:"Acepto con gratitud un agradecimiento voluntario, sin exigir nada.",p:10,m:'ok',f:"Perfecto. Muchas normas reconocen una recompensa razonable, pero nunca como imposición."},
+    {t:"Lo rechazo todo, molesto/a: yo no hice nada especial.",p:5,m:'meh',f:"Es noble, pero no hace falta ofenderse. Aceptar un gesto sincero no es incorrecto."},
+    {t:"Exijo la mitad del dinero o me llevo la billetera.",p:0,m:'bad',f:"Exigir dinero con presión puede ser extorsión y convertir un acto honesto en un problema legal."}]}
+ ],
+ explain:"Quien encuentra un bien perdido debe devolverlo o entregarlo a la autoridad. Quedárselo, o usar sus tarjetas o su dinero, puede constituir delito (apropiación de bien perdido, hurto o fraude, según el caso). Contar la verdad y entregar el bien te protege. Muchas leyes reconocen una recompensa razonable, pero no puede exigirse con presión.",
+ lessons:["Entrega los bienes perdidos a la autoridad y pide constancia.","Usar tarjetas o dinero ajeno es delito, sin importar el monto.","Actuar con honestidad te protege; exigir pagos con presión, no."]},
+
+{id:'viral',level:2,title:'El chisme viral',topic:'Honor, imagen y privacidad',bg:'school',npc:'noa',
+ steps:[
+  {s:'',t:"En el recreo, el chat del grupo del curso se llena de risas: alguien compartió una foto de Noa, tomada sin su permiso, con un comentario burlón."},
+  {q:"La foto llega a tu celular. ¿Qué haces?",o:[
+    {t:"No la reenvío, pido en el grupo que la borren y aviso a Noa de lo que está circulando.",p:10,m:'ok',f:"Bien hecho. Difundir una foto sin consentimiento vulnera la imagen y la privacidad de la persona, aunque sea «de broma»."},
+    {t:"No la reenvío, pero me río y no digo nada.",p:4,m:'meh',f:"No la compartiste, y eso cuenta. Pero callar ayuda a que el abuso continúe."},
+    {t:"La reenvío a otros grupos: es solo una broma.",p:0,m:'bad',f:"Reenviarla te convierte en parte del problema. Cada reenvío amplifica el daño y deja un rastro digital a tu nombre."}]},
+  {s:'n',t:"Me enteré de todo... Y ahora además dicen que yo robé en la tienda del colegio. ¡Es mentira, {n}!",mood:'bad'},
+  {q:"Noa está muy afectada. ¿Cómo la ayudas?",o:[
+    {t:"Le propongo guardar capturas de los mensajes como prueba y hablar con la orientadora o un adulto de confianza.",p:10,m:'ok',f:"Perfecto. Las capturas sirven de prueba y los adultos o la escuela pueden intervenir de forma segura."},
+    {t:"Le digo que lo ignore: ya se les va a pasar.",p:4,m:'meh',f:"Intentas calmarla, pero ignorar una acusación falsa puede dejarla sin defensa ni apoyo."},
+    {t:"Publico una respuesta insultando a quien lo dijo.",p:1,m:'bad',f:"Responder con insultos puede volverse en tu contra y escalar el conflicto en lugar de resolverlo."}]},
+  {s:'',t:"Se descubre que quien inició el rumor fue Dani. La orientadora del colegio convoca a una reunión con todos los involucrados.",npc:'dani'},
+  {q:"En la reunión te piden contar lo que sabes. ¿Qué haces?",o:[
+    {t:"Explico los hechos con calma, sin exagerar, y muestro las capturas como prueba.",p:10,m:'ok',f:"Contar los hechos con serenidad y pruebas reales es la forma más justa de aclarar una situación."},
+    {t:"No voy a la reunión: no quiero meterme.",p:3,m:'meh',f:"Evitar el conflicto es comprensible, pero tu testimonio podía ayudar a que se haga justicia."},
+    {t:"Exagero y añado cosas que no vi para que Dani quede peor.",p:0,m:'bad',f:"Inventar o exagerar también es faltar a la verdad y podría perjudicarte. La justicia se basa en hechos reales."}]},
+  {s:'n',t:"Yo... solo quise hacer una broma. No pensé que se haría tan grande. Lo siento, Noa.",mood:'meh'},
+  {q:"Dani se disculpa ante todos. ¿Cómo reaccionas?",o:[
+    {t:"Acepto la disculpa, pero pido que borre los mensajes y que la escuela tome medidas educativas y de reparación.",p:10,m:'ok',f:"Equilibrado: reconocer el error y reparar el daño es mejor que solo castigar. Así se aprende de lo ocurrido."},
+    {t:"Exijo que lo expulsen ya, sin escuchar a nadie más.",p:3,m:'meh',f:"Es normal sentir enojo, pero las sanciones deben decidirse por los canales y procedimientos de la escuela."},
+    {t:"Grabo un video burlándome de Dani y lo publico.",p:0,m:'bad',f:"Responder al daño con más daño te convierte en responsable también. No se arregla una falta con otra."}]}
+ ],
+ explain:"Cada persona tiene derecho a su imagen, a su honor y a su privacidad. Difundir fotos sin permiso o atribuir delitos falsos puede constituir difamación o violar la intimidad, aunque «solo fuera un chiste» y ocurra en redes. Si te pasa: guarda pruebas (capturas), no respondas con más agresión y acude a un adulto de confianza, a la escuela o a la autoridad. Las personas menores cuentan con medidas de protección y educativas.",
+ lessons:["Compartir fotos o rumores sin permiso puede dañar y tener consecuencias legales.","Guarda capturas como prueba y pide ayuda a un adulto o a la autoridad.","Reparar el daño y aprender es mejor que responder con más violencia."]},
+
+{id:'control',level:2,title:'Control en la esquina',topic:'Tus derechos ante la policía',bg:'street',npc:'vega',
+ steps:[
+  {s:'',t:"Es de noche y {n} regresa a casa después de una práctica. En la esquina, un oficial levanta la mano: es un control de identidad."},
+  {q:"El oficial te hace señas para que te detengas. ¿Qué haces?",o:[
+    {t:"Me detengo con calma, saludo y mantengo mis manos a la vista.",p:10,m:'ok',f:"Perfecto: la calma reduce tensiones y protege tu seguridad desde el primer segundo."},
+    {t:"Sigo caminando como si no lo hubiera visto.",p:2,m:'meh',f:"Ignorar a una autoridad puede interpretarse como sospechoso y complicar innecesariamente la situación."},
+    {t:"Salgo corriendo: me da mucho miedo.",p:0,m:'bad',f:"Huir puede generar una persecución y poner en riesgo tu integridad. Es la peor opción aunque no hayas hecho nada."}]},
+  {s:'n',t:"Buenas noches. Control de identidad. ¿Me muestra su documento, por favor?"},
+  {q:"El oficial te pide tu documento. ¿Cómo respondes?",o:[
+    {t:"Muestro mi documento de identidad y pregunto con respeto el motivo del control.",p:10,m:'ok',f:"Correcto. Identificarte es un deber, y preguntar el motivo con respeto es parte de tus derechos."},
+    {t:"Me niego a decir mi nombre: no tengo por qué hacerlo.",p:2,m:'meh',f:"En un control de identidad, negarte a identificarte puede llevar a que te trasladen. Colaborar con respeto es más seguro."},
+    {t:"Grito que es un abuso y que lo voy a grabar todo.",p:0,m:'bad',f:"Grabar puede ser válido, pero gritar y agredir verbalmente solo escala el conflicto. Los reclamos se hacen por vías formales."}]},
+  {s:'n',t:"Gracias. Ahora voy a revisar su mochila.",mood:'meh'},
+  {q:"El oficial quiere revisar tu mochila. ¿Qué haces?",o:[
+    {t:"Pregunto con calma si hay un motivo legal para la revisión, no me resisto físicamente y pido que quede constancia.",p:10,m:'ok',f:"Muy bien: puedes preguntar el fundamento y dejar constancia, sin resistirte físicamente. Los reclamos van después, por canales formales."},
+    {t:"Dejo que revise todo sin preguntar nada.",p:5,m:'meh',f:"Colaborar evita problemas, pero conocer tus derechos te permite preguntar el motivo y pedir constancia."},
+    {t:"Le arrebato la mochila y me alejo.",p:0,m:'bad',f:"Forcejear puede acusarse como resistencia a la autoridad y convertir un trámite en un delito."}]},
+  {s:'n',t:"Hubo un robo cerca y usted coincide con la descripción. Tendrá que acompañarme a la comisaría para aclararlo.",mood:'bad'},
+  {q:"El oficial te pide acompañarlo a la comisaría. ¿Qué haces?",o:[
+    {t:"Mantengo la calma, pregunto el motivo, recuerdo mi derecho a avisar a mi familia y a un abogado, y lo acompaño.",p:10,m:'ok',f:"Excelente. Tienes derecho a saber el motivo, a comunicarte con tu familia y a contar con un abogado. Mantener la calma te protege."},
+    {t:"Firmo lo que me den sin leerlo, para terminar rápido.",p:2,m:'meh',f:"Nunca firmes un documento sin leerlo. Podrías aceptar hechos que no son ciertos."},
+    {t:"Forcejeo y me resisto para que no me lleven.",p:0,m:'bad',f:"La resistencia física puede traerte cargos adicionales y riesgo de lesiones. Los abusos se denuncian después, no en el momento."}]}
+ ],
+ explain:"Frente a la policía tienes derechos: trato digno, que te informen el motivo de la intervención, no sufrir violencia, comunicarte con tus familiares y contar con un abogado. Lo recomendable es mantener la calma, no resistirte físicamente, identificarte y pedir que se registre todo; si hubo abuso, se reclama después por las vías formales. Las reglas exactas varían según el país.",
+ lessons:["La calma y el respeto te protegen; huir o forcejear empeora todo.","Tienes derecho a saber el motivo, a avisar a tu familia y a un abogado.","No firmes nada sin leerlo; los reclamos se hacen por vías formales."]},
+
+{id:'trabajo',level:2,title:'Mi primer trabajo',topic:'Derechos laborales',bg:'cafe',npc:'lucero',
+ steps:[
+  {s:'',t:"{n} consigue su primer trabajo en la cafetería «Grano Dorado». La dueña, Lucero, parece amable y lo recibe con un delantal nuevo."},
+  {s:'n',t:"¡Bienvenido/a al equipo! Empiezas mañana. Los papeles los firmamos «después», ¿sí?",mood:'meh'},
+  {q:"Lucero propone empezar sin firmar nada todavía. ¿Qué haces?",o:[
+    {t:"Pido por escrito el contrato con mis funciones, horario y sueldo antes de empezar.",p:10,m:'ok',f:"Muy bien. Tener claras tus funciones, horario y pago por escrito evita malentendidos y te protege."},
+    {t:"Acepto: necesito el empleo y confío en ella.",p:3,m:'meh',f:"Confiar está bien, pero sin nada por escrito será muy difícil probar tus condiciones si algo sale mal."},
+    {t:"Empiezo sin preguntar ni siquiera por el sueldo.",p:0,m:'bad',f:"Trabajar sin conocer las condiciones te deja sin saber cuánto te corresponde ni qué puedes reclamar."}]},
+  {s:'n',t:"Otra cosa: aquí trabajamos doce horas seguidas, sin descanso. Así es el negocio. ¿Hay algún problema?",mood:'bad'},
+  {q:"Te piden trabajar doce horas seguidas sin descanso. ¿Qué respondes?",o:[
+    {t:"Explico con respeto que la ley fija una jornada máxima y descansos, y propongo un horario dentro de lo legal.",p:10,m:'ok',f:"Correcto. Las jornadas máximas y los descansos existen para proteger tu salud y no dependen de «cómo es el negocio»."},
+    {t:"Renuncio en el acto sin dar explicaciones.",p:4,m:'meh',f:"Puedes irte, pero sin dialogar ni dejar constancia pierdes la oportunidad de corregir la situación."},
+    {t:"Acepto lo que sea para caerle bien a la jefa.",p:1,m:'bad',f:"Aceptar condiciones fuera de la ley no te protege: te agota y debilita tus reclamos futuros."}]},
+  {s:'',t:"Llega el día de pago... pero el dinero que recibes es menos de lo acordado y no te entregan ningún comprobante."},
+  {q:"Te pagaron menos y sin comprobante. ¿Qué haces?",o:[
+    {t:"Anoto mis horas trabajadas, pido mi boleta de pago y solicito la corrección por escrito.",p:10,m:'ok',f:"Perfecto. Llevar tu propio registro y reclamar por escrito te da respaldo para cualquier trámite posterior."},
+    {t:"Me quedo callado/a para no tener problemas.",p:3,m:'meh',f:"Callar hoy puede significar perder tu dinero mañana. Tienes derecho a recibir lo pactado."},
+    {t:"Dejo de ir al trabajo como protesta.",p:0,m:'bad',f:"Abandonar el trabajo sin avisar puede jugar en tu contra y hacerte perder derechos."}]},
+  {s:'n',t:"Si reclamas, mejor búscate otro trabajo. Aquí mando yo.",mood:'bad'},
+  {q:"Lucero te amenaza con despedirte si reclamas. ¿Cuál es tu respuesta?",o:[
+    {t:"Guardo mis pruebas y busco asesoría en la autoridad laboral o en un sindicato.",p:10,m:'ok',f:"Exacto. Despedir como represalia por reclamar derechos puede estar prohibido, y la autoridad laboral puede intervenir."},
+    {t:"Renuncio sin cobrar lo que me deben.",p:3,m:'meh',f:"Renunciar puede ser tu decisión, pero sin reclamar pierdes lo que te corresponde cobrar."},
+    {t:"Amenazo con dañar la cafetería si me despide.",p:0,m:'bad',f:"Amenazar o dañar es un delito y te quita la razón. Defiende tus derechos solo por vías legales."}]}
+ ],
+ explain:"Todo trabajo debe respetar derechos básicos: contrato o constancia con funciones, horario y remuneración; jornada máxima y descansos; pago completo y a tiempo con boleta; y protección contra represalias. Si hay incumplimientos, guarda pruebas y acude a la autoridad laboral o a un sindicato, sin dañar ni abandonar el empleo de forma impulsiva.",
+ lessons:["Pide contrato o constancia por escrito antes de empezar a trabajar.","Las jornadas máximas, los descansos y el pago completo son derechos.","Reclama con pruebas ante la autoridad laboral; no con amenazas ni abandono."]}
+];
+
+/* ================= NAVEGACIÓN ================= */
+const SCREENS=['start','reg','wel','menu','char','story','end'];
+let curScreen='start',busy=false;
+function activate(id){SCREENS.forEach(s=>$('s-'+s).classList.toggle('active',s===id));curScreen=id}
+function go(id,cb){
+  if(busy)return;busy=true;const w=$('wipe');w.className='cover';blip(330,.09);
+  setTimeout(()=>{activate(id);cb&&cb();w.className='rev';setTimeout(()=>{w.className='';busy=false},420)},480);
+}
+let toastT=null;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
+function modal(msg,btns){
+  $('mo-msg').textContent=msg;const b=$('mo-btns');b.innerHTML='';
+  btns.forEach(([l,fn,cls])=>{const e=document.createElement('button');e.className='btn sm '+(cls||'');e.textContent=l;e.onclick=()=>{$('modal').classList.remove('on');fn&&fn()};b.append(e)});
+  $('modal').classList.add('on');
+}
+
+/* ---------- inicio ---------- */
+function drawScale(){
+  const cv=$('scaleIcon'),g=cv.getContext('2d');
+  R(g,15,2,2,17,C.gold);R(g,6,4,20,2,C.gold);R(g,6,6,1,8,C.gold);R(g,25,6,1,8,C.gold);
+  R(g,2,14,9,2,C.gold);R(g,21,14,9,2,C.gold);R(g,3,16,7,1,C.wood);R(g,22,16,7,1,C.wood);
+  R(g,11,19,10,2,C.gold);R(g,9,21,14,2,C.gold);R(g,15,1,2,1,C.cream);
+  outline(cv,C.ink);
+}
+function initStart(){
+  paint($('bg-start'),'court');paint($('bg-reg'),'flat');paint($('bg-wel'),'court');paint($('bg-menu'),'park');paint($('bg-char'),'school');paint($('bg-end'),'court');
+  drawScale();
+  const p=$('parade');Object.keys(CHARS).forEach(k=>p.append(spriteImg('p:'+k)));
+  const w=$('w-pr');Object.keys(CHARS).forEach(k=>w.append(spriteImg('p:'+k)));
+}
+$('b-play').onclick=()=>go('reg',()=>{const i=$('name-in');i.value=G.name||'';updReg();setTimeout(()=>i.focus(),50)});
+
+/* ---------- registro ---------- */
+const cleanName=v=>v.replace(/\s+/g,' ').trim().slice(0,14);
+function updReg(){const ok=cleanName($('name-in').value).length>0;$('r-go').classList.toggle('off',!ok);if(ok)$('name-err').textContent=''}
+$('name-in').addEventListener('input',updReg);
+function regGo(){
+  const n=cleanName($('name-in').value),i=$('name-in');
+  if(!n){$('name-err').textContent='Escribe tu nombre para continuar.';i.classList.remove('shake');void i.offsetWidth;i.classList.add('shake');i.focus();blip(160,.12);return}
+  G.name=n;save();go('wel',()=>{$('w-name').textContent='¡Bienvenido/a, '+n+'!'});
+}
+$('r-go').onclick=regGo;
+$('r-back').onclick=()=>go('start');
+$('name-in').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();regGo()}});
+
+/* ---------- bienvenida ---------- */
+$('w-go').onclick=()=>go('menu',renderMenu);
+
+/* ---------- menú ---------- */
+let lvl=1;
+const unlocked=i=>i===0||!!G.done[STORIES[i-1].id];
+const starStr=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+const LVT={1:'NIVEL 1 · Tus derechos de cada día',2:'NIVEL 2 · Casos de la vida real'};
+function renderMenu(){
+  $('m-name').textContent=G.name||'Jugador/a';
+  const av=$('m-av');if(G.char&&CHARS[G.char]){av.src=spriteURL('p:'+G.char);av.style.display=''}else av.style.display='none';
+  const tot=Object.values(G.done).reduce((a,d)=>a+(d.stars||0),0),cnt=Object.keys(G.done).length;
+  $('m-prog').textContent='★ '+tot+' / '+STORIES.length*3+'   ·   Casos resueltos: '+cnt+' / '+STORIES.length;
+  $('tab1').classList.toggle('on',lvl===1);$('tab2').classList.toggle('on',lvl===2);
+  $('lvl-title').textContent=LVT[lvl];
+  const box=$('cards');box.innerHTML='';
+  STORIES.forEach((s,idx)=>{
+    if(s.level!==lvl)return;
+    const open=unlocked(idx),d=G.done[s.id];
+    const el=document.createElement('button');el.className='card'+(open?'':' locked');
+    const cv=document.createElement('canvas');cv.width=160;cv.height=90;
+    const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(getBG(s.bg),0,0);g.drawImage(spriteCv('n:'+s.npc),0,0,24,32,100,28,48,64);
+    const no=document.createElement('div');no.className='no';no.textContent='CASO '+(idx+1);
+    const h=document.createElement('h3');h.textContent=s.title;
+    const tp=document.createElement('div');tp.className='tp';tp.textContent=s.topic;
+    const st=document.createElement('div');st.className='st';
+    if(!open){st.textContent='Bloqueado: completa «'+STORIES[idx-1].title+'»'}
+    else if(d){st.textContent=starStr(d.stars)+'  Mejor: '+d.score+'/'+d.max}
+    else{st.textContent='▶ ¡Nuevo caso!';st.classList.add('go')}
+    el.append(no,cv,h,tp,st);
+    if(!open){const lk=document.createElement('div');lk.className='lk';lk.textContent='🔒';el.append(lk)}
+    el.onclick=()=>{open?pickChar(s):(blip(150,.15),toast('Completa primero «'+STORIES[idx-1].title+'»'))};
+    box.append(el);
+  });
+}
+$('tab1').onclick=()=>{lvl=1;renderMenu()};
+$('tab2').onclick=()=>{lvl=2;renderMenu()};
+$('m-home').onclick=()=>go('start');
+$('m-char').onclick=()=>{pend=null;go('char',renderChars)};
+$('m-reset').onclick=()=>modal('¿Seguro que quieres borrar todo tu progreso? Se conservarán tu nombre y tu personaje.',[
+  ['SÍ, BORRAR',()=>{G.done={};save();lvl=1;renderMenu();toast('Progreso reiniciado')},'rose'],['CANCELAR',null,'sage']]);
+
+/* ---------- personaje ---------- */
+let pend=null,sel=null;
+function pickChar(s){pend=s;go('char',renderChars)}
+function renderChars(){
+  sel=G.char&&CHARS[G.char]?G.char:null;
+  const grid=$('ch-grid');grid.innerHTML='';
+  Object.keys(CHARS).forEach(k=>{
+    const c=CHARS[k],b=document.createElement('button');b.className='ch';b.dataset.k=k;
+    const h=document.createElement('h3');h.textContent=c.name;
+    const r=document.createElement('div');r.className='ro';r.textContent=c.role;
+    const d=document.createElement('div');d.className='ds';d.textContent=c.desc;
+    b.append(spriteImg('p:'+k),h,r,d);
+    b.onclick=()=>{sel=k;blip(660,.07);updChars()};
+    grid.append(b);
+  });
+  updChars();
+}
+function updChars(){
+  document.querySelectorAll('.ch').forEach(b=>b.classList.toggle('sel',b.dataset.k===sel));
+  const go_=$('c-go');go_.classList.toggle('off',!sel);go_.textContent=pend?'COMENZAR HISTORIA':'GUARDAR';
+}
+$('c-back').onclick=()=>go('menu',renderMenu);
+$('c-go').onclick=()=>{
+  if(!sel){toast('Elige un personaje para continuar');blip(160,.12);return}
+  G.char=sel;save();
+  if(pend){const s=pend;pend=null;startStory(s)}else go('menu',renderMenu);
+};
+
+/* ---------- historia ---------- */
+let cur=null,tm=null,tFull='',tDone=null,typing=false,shuf=[];
+const fill=t=>String(t).replaceAll('{n}',G.name||'Jugador/a');
+function startStory(s){
+  cur={st:s,i:0,score:0,max:s.steps.filter(x=>x.o).length*10,bg:s.bg,npc:s.npc,ph:'say',ans:0};
+  go('story',()=>{buildPips();paintStory();step()});
+}
+function buildPips(){
+  const p=$('pips');p.innerHTML='';
+  cur.st.steps.filter(x=>x.o).forEach(()=>{const e=document.createElement('div');e.className='pip';p.append(e)});
+}
+function updHud(){
+  $('hud-t').textContent='Nivel '+cur.st.level+' · '+cur.st.title;
+  $('hud-s').textContent='⚖ '+cur.score+' / '+cur.max;
+  [...$('pips').children].forEach((e,i)=>e.classList.toggle('on',i<cur.ans));
+}
+function paintStory(){
+  paint($('bg-story'),cur.bg);
+  $('im-p').src=spriteURL('p:'+G.char);$('im-n').src=spriteURL('n:'+cur.npc);
+  $('nm-p').textContent=G.name;$('nm-n').textContent=NPC[cur.npc].name;
+}
+function setTag(l,c){const t=$('tag');t.textContent=l;t.className=c}
+function setTalk(w){$('spr-p').classList.toggle('talk',w==='p'||!w);$('spr-n').classList.toggle('talk',w==='n'||!w)}
+const EMO={ok:'♥',meh:'…',bad:'!!'};
+function setEmote(m){
+  const e=$('emo');e.classList.remove('on');void e.offsetWidth;
+  const n=$('spr-n');n.classList.remove('hop','bad');
+  if(m&&EMO[m]){e.textContent=EMO[m];e.classList.add('on');if(m==='ok')n.classList.add('hop');if(m==='bad')n.classList.add('bad')}
+}
+function typeText(t,done){
+  clearInterval(tm);tFull=fill(t);tDone=done;const el=$('txt');el.textContent='';$('nxt').classList.remove('on');typing=true;let n=0;
+  tm=setInterval(()=>{n++;el.textContent=tFull.slice(0,n);if(n%4===0)blip(260+(n%3)*50,.03,.02);if(n>=tFull.length)fin()},20);
+}
+function fin(){
+  clearInterval(tm);if(!typing)return;typing=false;$('txt').textContent=tFull;
+  const d=tDone;tDone=null;d&&d();
+}
+function step(){
+  const st=cur.st;
+  if(cur.i>=st.steps.length)return finish();
+  const s=st.steps[cur.i];
+  cur.bg=s.bg||cur.bg;cur.npc=s.npc||cur.npc;paintStory();
+  setEmote(s.mood||'');$('opts').innerHTML='';$('pts').classList.remove('on');
+  $('s-story').classList.toggle('deciding',!!s.o);
+  updHud();
+  if(s.o){
+    cur.ph='ask';setTag('TU DECISIÓN','q');setTalk('p');
+    typeText(s.q,()=>showOpts(s));
+  }else{
+    cur.ph='say';const w=s.s;
+    setTag(w==='p'?G.name:w==='n'?NPC[cur.npc].name:'NARRADOR',w==='p'?'p':w==='n'?'':'x');setTalk(w);
+    typeText(s.t,()=>{cur.ph='wait';$('nxt').classList.add('on')});
+  }
+}
+function showOpts(s){
+  shuf=s.o.map(x=>x);for(let i=shuf.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuf[i],shuf[j]]=[shuf[j],shuf[i]]}
+  const box=$('opts');box.innerHTML='';
+  shuf.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='opt';
+    const l=document.createElement('b');l.textContent='ABC'[i];const t=document.createElement('span');t.textContent=o.t;
+    b.append(l,t);b.onclick=e=>{e.stopPropagation();choose(o)};box.append(b);
+  });
+  cur.ph='choose';
+}
+function choose(o){
+  if(cur.ph!=='choose')return;
+  cur.ph='cons';$('opts').innerHTML='';cur.score+=o.p;cur.ans++;
+  const pt=$('pts');pt.textContent=(o.p>0?'+':'')+o.p+' ⚖';pt.classList.remove('on');void pt.offsetWidth;pt.classList.add('on');
+  blip(o.m==='ok'?880:o.m==='bad'?140:440,.12);
+  setEmote(o.m);setTag('CONSECUENCIA '+(o.m==='ok'?'✔':o.m==='bad'?'✖':'➜'),'c');setTalk('n');
+  $('s-story').classList.remove('deciding');updHud();
+  typeText(o.f,()=>{cur.ph='wait';$('nxt').classList.add('on')});
+}
+function advance(){
+  if(!cur||curScreen!=='story')return;
+  if(typing){fin();return}
+  if(cur.ph==='wait'){cur.i++;step()}
+}
+$('dlg').onclick=()=>{if(cur&&cur.ph!=='choose'&&cur.ph!=='ask')advance();else if(typing)fin()};
+$('b-quit').onclick=()=>modal('¿Salir de la historia? Perderás el avance de este caso.',[['SALIR',()=>{clearInterval(tm);typing=false;go('menu',renderMenu)},'rose'],['SEGUIR',null,'sage']]);
+document.addEventListener('keydown',e=>{
+  if(curScreen!=='story'||!cur||$('modal').classList.contains('on'))return;
+  if(e.key==='Enter'||e.key===' '){if(cur.ph==='wait'||typing){e.preventDefault();advance()}}
+  else if(cur.ph==='choose'&&'123'.includes(e.key)&&shuf[+e.key-1]){choose(shuf[+e.key-1])}
+});
+
+/* ---------- final ---------- */
+let lastNext=null;
+function finish(){
+  const st=cur.st,pct=cur.score/cur.max;
+  const stars=pct>=.8?3:pct>=.5?2:1;
+  const prev=G.done[st.id],first=!prev;
+  if(!prev||cur.score>prev.score)G.done[st.id]={score:cur.score,max:cur.max,stars};
+  save();
+  const idx=STORIES.indexOf(st),nxt=STORIES[idx+1];
+  let v,vs,cls;
+  if(pct>=.8){v='¡NO CULPABLE!';vs='Actuaste conforme a derecho. ¡Caso ganado!';cls='ok'}
+  else if(pct>=.5){v='CULPABLE, CON ATENUANTES';vs='Hubo aciertos, pero también errores que corregir.';cls='mid'}
+  else{v='CULPABLE';vs='Aún puedes aprender a actuar mejor. ¡Inténtalo otra vez!';cls='no'}
+  go('end',()=>{
+    $('e-img').src=spriteURL('p:'+G.char);
+    const h=$('e-v');h.textContent=v;h.className=cls;$('e-vs').textContent=vs;
+    $('e-stars').innerHTML=Array.from({length:3},(_,i)=>i<stars?'★':'<i>★</i>').join('');
+    $('e-sc').textContent='Puntos: '+cur.score+' / '+cur.max;
+    const b=$('e-ban');b.classList.remove('on');
+    if(first&&nxt){b.textContent=nxt.level>st.level?'¡NIVEL '+nxt.level+' DESBLOQUEADO!':'¡NUEVO CASO DESBLOQUEADO!';b.classList.add('on')}
+    else if(first&&!nxt){b.textContent='¡HAS COMPLETADO TODOS LOS CASOS!';b.classList.add('on')}
+    $('e-ex').textContent=st.explain;
+    const ul=$('e-ls');ul.innerHTML='';st.lessons.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.append(li)});
+    lastNext=nxt||null;$('e-next').style.display=nxt?'':'none';
+    blip(pct>=.5?784:220,.25);
+  });
+}
+$('e-next').onclick=()=>{if(lastNext)startStory(lastNext)};
+$('e-again').onclick=()=>startStory(cur.st);
+$('e-menu').onclick=()=>{if(cur&&cur.st)lvl=cur.st.level;go('menu',renderMenu)};
+
+/* ---------- sonido y partículas ---------- */
+$('snd').onclick=()=>{G.mute=!G.mute;save();setSnd();if(!G.mute)blip(660,.08)};
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.btn:not(#snd)'))blip(520,.05)},true);
+
+const fg=$('fx').getContext('2d');
+const P=Array.from({length:42},()=>({x:Math.random()*320,y:Math.random()*180,v:.05+Math.random()*.16,t:Math.random()*6,s:Math.random()<.3?2:1,c:Math.random()<.6?C.gold:C.cream}));
+function tick(){
+  fg.clearRect(0,0,320,180);
+  for(const p of P){
+    p.t+=.04;p.y-=p.v;p.x+=Math.sin(p.t)*.15;if(p.y<-4){p.y=184;p.x=Math.random()*320}
+    fg.globalAlpha=.3+.7*Math.abs(Math.sin(p.t*1.5));fg.fillStyle=p.c;const x=p.x|0,y=p.y|0;
+    if(p.s===2){fg.fillRect(x,y-1,1,3);fg.fillRect(x-1,y,3,1)}else fg.fillRect(x,y,1,1);
+  }
+  fg.globalAlpha=1;
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches)requestAnimationFrame(tick);
+}
+
+/* ---------- arranque ---------- */
+const wp=$('wipe');for(let i=0;i<10;i++){const b=document.createElement('i');b.style.setProperty('--i',i);wp.append(b)}
+setSnd();initStart();activate('start');tick();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
